@@ -11,14 +11,9 @@ from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.urandom(24)
-app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['OUTPUT_FILE'] = 'web_extraction_results.xlsx'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 app.config['ALLOWED_EXTENSIONS'] = {'pdf'}
-
-# Create uploads folder if it doesn't exist
-if not os.path.exists(app.config['UPLOAD_FOLDER']):
-    os.makedirs(app.config['UPLOAD_FOLDER'])
 
 # Schema definition
 class ExtractionSchema(typing_extensions.TypedDict):
@@ -73,7 +68,7 @@ extraction_results = []
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
 
-def extract_from_pdf(file_path, api_key, prompt):
+def extract_from_pdf(pdf_content, api_key, prompt):
     try:
         genai.configure(api_key=api_key)
         
@@ -87,12 +82,9 @@ def extract_from_pdf(file_path, api_key, prompt):
             }
         )
         
-        with open(file_path, "rb") as f:
-            pdf_data = f.read()
-        
-        print(f"Sending request to Gemini for {os.path.basename(file_path)}...")
+        print(f"Sending request to Gemini...")
         response = model.generate_content(
-            [prompt, {"mime_type": "application/pdf", "data": pdf_data}],
+            [prompt, {"mime_type": "application/pdf", "data": pdf_content}],
             request_options={"retry": retry.Retry(predicate=retry.if_transient_error)}
         )
         
@@ -125,12 +117,12 @@ def extract():
         if file.filename == '' or not allowed_file(file.filename):
             return jsonify({'error': 'Invalid file'}), 400
         
+        # Read file directly into memory
+        pdf_content = file.read()
         filename = secure_filename(file.filename)
-        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        file.save(filepath)
         
         # Extract
-        data = extract_from_pdf(filepath, api_key, prompt)
+        data = extract_from_pdf(pdf_content, api_key, prompt)
         
         # Normalize Data Lists
         container_numbers = data.get('container_numbers')
@@ -181,8 +173,6 @@ def extract():
             df = df[cols]
             df.to_excel(app.config['OUTPUT_FILE'], index=False)
         
-        os.remove(filepath)
-        
         return jsonify({
             'success': True, 
             'data': new_rows,
@@ -190,8 +180,6 @@ def extract():
         })
         
     except Exception as e:
-        if os.path.exists(filepath):
-            os.remove(filepath)
         return jsonify({'error': str(e)}), 500
 
 @app.route('/download')
