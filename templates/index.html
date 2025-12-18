@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini PDF Extractor | AI-Powered Invoice Processing</title>
+    <meta name="description" content="Extract invoice data from PDFs using Google Gemini AI">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <!-- Animated background -->
+    <div class="bg-gradient"></div>
+    <div class="bg-grid"></div>
+    <div class="floating-orbs">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"/>
+                            <line x1="12" y1="22" x2="12" y2="15.5"/>
+                            <polyline points="22 8.5 12 15.5 2 8.5"/>
+                            <polyline points="2 15.5 12 8.5 22 15.5"/>
+                            <line x1="12" y1="2" x2="12" y2="8.5"/>
+                        </svg>
+                    </div>
+                    <div class="logo-text">
+                        <span class="logo-title">Gemini</span>
+                        <span class="logo-subtitle">PDF Extractor</span>
+                    </div>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" data-section="upload">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+                    </svg>
+                    <span>Upload</span>
+                </a>
+                <a href="#" class="nav-item" data-section="settings">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                    </svg>
+                    <span>Settings</span>
+                </a>
+                <a href="#" class="nav-item" data-section="results">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
+                    </svg>
+                    <span>Results</span>
+                    <span class="badge" id="results-count">0</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="api-status" id="api-status">
+                    <div class="status-dot"></div>
+                    <span>API Not Connected</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Upload Section -->
+            <section class="section active" id="section-upload">
+                <div class="section-header">
+                    <div>
+                        <h1>Upload Invoice</h1>
+                        <p class="section-desc">Drag and drop your Maersk PDF invoices for AI-powered data extraction</p>
+                    </div>
+                </div>
+
+                <div class="upload-zone" id="drop-zone">
+                    <div class="upload-content">
+                        <div class="upload-icon-wrapper">
+                            <div class="upload-icon-bg"></div>
+                            <svg class="upload-icon" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                <polyline points="17 8 12 3 7 8"/>
+                                <line x1="12" y1="3" x2="12" y2="15"/>
+                            </svg>
+                        </div>
+                        <h3>Drop your PDF here</h3>
+                        <p>or <span class="upload-browse">browse files</span></p>
+                        <span class="upload-hint">Supports: PDF files up to 16MB</span>
+                    </div>
+                    <input type="file" id="file-input" hidden accept=".pdf">
+                </div>
+
+                <!-- File Preview -->
+                <div class="file-preview hidden" id="file-preview">
+                    <div class="file-info">
+                        <div class="file-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                <polyline points="14 2 14 8 20 8"/>
+                            </svg>
+                        </div>
+                        <div class="file-details">
+                            <span class="file-name" id="selected-file-name">document.pdf</span>
+                            <span class="file-size" id="selected-file-size">2.4 MB</span>
+                        </div>
+                        <button class="btn-icon" id="remove-file" title="Remove file">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <button class="btn-primary btn-lg" id="extract-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                        </svg>
+                        <span>Extract Data</span>
+                    </button>
+                </div>
+
+                <!-- Processing State -->
+                <div class="processing-state hidden" id="processing-state">
+                    <div class="processing-animation">
+                        <div class="processing-ring"></div>
+                        <div class="processing-ring"></div>
+                        <div class="processing-ring"></div>
+                    </div>
+                    <h3>Processing Invoice</h3>
+                    <p id="processing-text">Analyzing document structure...</p>
+                </div>
+            </section>
+
+            <!-- Settings Section -->
+            <section class="section" id="section-settings">
+                <div class="section-header">
+                    <div>
+                        <h1>Settings</h1>
+                        <p class="section-desc">Configure your API key and extraction prompt</p>
+                    </div>
+                </div>
+
+                <div class="settings-grid">
+                    <div class="settings-card">
+                        <div class="card-header">
+                            <div class="card-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3>API Configuration</h3>
+                                <p>Enter your Google Gemini API key</p>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="input-group">
+                                <label for="api-key">Gemini API Key</label>
+                                <div class="input-with-icon">
+                                    <input type="password" id="api-key" placeholder="AIza..." class="input">
+                                    <button class="btn-icon toggle-visibility" id="toggle-api-key">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <span class="input-hint">Key is used only for current session</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-card full-width">
+                        <div class="card-header">
+                            <div class="card-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                    <polyline points="14 2 14 8 20 8"/>
+                                    <line x1="16" y1="13" x2="8" y2="13"/>
+                                    <line x1="16" y1="17" x2="8" y2="17"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3>Extraction Prompt</h3>
+                                <p>Customize how the AI extracts data from your invoices</p>
+                            </div>
+                            <button class="btn-secondary" id="reset-prompt">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+                                </svg>
+                                Reset
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <textarea id="prompt" rows="16" class="input code-input">{{ default_prompt }}</textarea>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Results Section -->
+            <section class="section" id="section-results">
+                <div class="section-header">
+                    <div>
+                        <h1>Extraction Results</h1>
+                        <p class="section-desc">View and export your extracted invoice data</p>
+                    </div>
+                    <div class="header-actions">
+                        <button class="btn-secondary" id="clear-btn">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                            </svg>
+                            Clear All
+                        </button>
+                        <button class="btn-primary" id="download-btn">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+                            </svg>
+                            Download Excel
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Empty State -->
+                <div class="empty-state" id="empty-state">
+                    <div class="empty-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                            <polyline points="14 2 14 8 20 8"/>
+                            <line x1="12" y1="18" x2="12" y2="12"/>
+                            <line x1="9" y1="15" x2="15" y2="15"/>
+                        </svg>
+                    </div>
+                    <h3>No extractions yet</h3>
+                    <p>Upload a PDF invoice to start extracting data</p>
+                    <button class="btn-primary" onclick="document.querySelector('[data-section=upload]').click()">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+                        </svg>
+                        Upload PDF
+                    </button>
+                </div>
+
+                <!-- Results Table -->
+                <div class="table-wrapper hidden" id="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>File</th>
+                                <th>Invoice Date</th>
+                                <th>Invoice #</th>
+                                <th>BL Number</th>
+                                <th>Port of Loading</th>
+                                <th>Destination</th>
+                                <th>Container #</th>
+                                <th>Weight</th>
+                                <th>Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody id="results-body">
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="toast">
+        <div class="toast-icon"></div>
+        <span class="toast-message"></span>
+    </div>
+
+    <script>
+        const defaultPrompt = `{{ default_prompt|safe }}`;
+        let selectedFile = null;
+
+        // DOM Elements
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const filePreview = document.getElementById('file-preview');
+        const processingState = document.getElementById('processing-state');
+        const extractBtn = document.getElementById('extract-btn');
+        const removeFileBtn = document.getElementById('remove-file');
+        const apiKeyInput = document.getElementById('api-key');
+        const toggleApiKeyBtn = document.getElementById('toggle-api-key');
+        const promptInput = document.getElementById('prompt');
+        const resetPromptBtn = document.getElementById('reset-prompt');
+        const downloadBtn = document.getElementById('download-btn');
+        const clearBtn = document.getElementById('clear-btn');
+        const resultsBody = document.getElementById('results-body');
+        const resultsCount = document.getElementById('results-count');
+        const emptyState = document.getElementById('empty-state');
+        const tableWrapper = document.getElementById('table-wrapper');
+        const apiStatus = document.getElementById('api-status');
+
+        // Navigation
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                const section = item.dataset.section;
+                
+                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+                item.classList.add('active');
+                
+                document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+                document.getElementById(`section-${section}`).classList.add('active');
+            });
+        });
+
+        // REMOVED: localStorage auto-load logic
+        // We do save the key to status so the UI knows if it is set during the session if we wanted, 
+        // but for now we rely on the input value.
+        
+        // Update API status indicator based on input
+        apiKeyInput.addEventListener('input', () => {
+            updateApiStatus(apiKeyInput.value.length > 5);
+        });
+
+        // Toggle API key visibility
+        toggleApiKeyBtn.addEventListener('click', () => {
+            const type = apiKeyInput.type === 'password' ? 'text' : 'password';
+            apiKeyInput.type = type;
+        });
+
+        // Update API status indicator
+        function updateApiStatus(connected) {
+            apiStatus.classList.toggle('connected', connected);
+            apiStatus.querySelector('span').textContent = connected ? 'API Ready' : 'API Not Connected';
+        }
+
+        // Reset prompt
+        resetPromptBtn.addEventListener('click', () => {
+            promptInput.value = defaultPrompt;
+            showToast('Prompt reset to default', 'success');
+        });
+
+        // File upload handlers
+        dropZone.addEventListener('click', () => fileInput.click());
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('drag-over');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('drag-over');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('drag-over');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) handleFileSelect(files[0]);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) handleFileSelect(e.target.files[0]);
+        });
+
+        removeFileBtn.addEventListener('click', () => {
+            selectedFile = null;
+            filePreview.classList.add('hidden');
+            dropZone.classList.remove('hidden');
+            fileInput.value = '';
+        });
+
+        function handleFileSelect(file) {
+            if (!file.name.toLowerCase().endsWith('.pdf')) {
+                showToast('Please select a PDF file', 'error');
+                return;
+            }
+            
+            selectedFile = file;
+            document.getElementById('selected-file-name').textContent = file.name;
+            document.getElementById('selected-file-size').textContent = formatFileSize(file.size);
+            
+            dropZone.classList.add('hidden');
+            filePreview.classList.remove('hidden');
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // Extract handler
+        extractBtn.addEventListener('click', async () => {
+            const apiKey = apiKeyInput.value.trim();
+            const prompt = promptInput.value.trim();
+
+            if (!apiKey) {
+                showToast('Please enter your Gemini API key in Settings', 'error');
+                // Switch to settings
+                document.querySelector('[data-section=settings]').click();
+                setTimeout(() => apiKeyInput.focus(), 500);
+                return;
+            }
+
+            if (!selectedFile) {
+                showToast('Please select a PDF file', 'error');
+                return;
+            }
+
+            // Show processing state
+            filePreview.classList.add('hidden');
+            processingState.classList.remove('hidden');
+
+            const messages = [
+                'Analyzing document structure...',
+                'Extracting invoice data...',
+                'Processing container information...',
+                'Validating extracted fields...'
+            ];
+            let msgIndex = 0;
+            const msgInterval = setInterval(() => {
+                msgIndex = (msgIndex + 1) % messages.length;
+                document.getElementById('processing-text').textContent = messages[msgIndex];
+            }, 2000);
+
+            try {
+                const formData = new FormData();
+                formData.append('file', selectedFile);
+                formData.append('api_key', apiKey);
+                formData.append('prompt', prompt);
+
+                const response = await fetch('/extract', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+                clearInterval(msgInterval);
+
+                if (response.ok && result.success) {
+                    showToast('Extraction completed successfully!', 'success');
+                    updateResults(result.data);
+                    resultsCount.textContent = result.total_records;
+                    
+                    // Reset upload UI
+                    selectedFile = null;
+                    fileInput.value = '';
+                    processingState.classList.add('hidden');
+                    dropZone.classList.remove('hidden');
+                    
+                    // Switch to results tab
+                    document.querySelector('[data-section=results]').click();
+                } else {
+                    throw new Error(result.error || 'Extraction failed');
+                }
+            } catch (error) {
+                clearInterval(msgInterval);
+                console.error('Error:', error);
+                
+                // Show user friendly error from backend
+                showToast(error.message, 'error');
+                
+                // Reset UI to allow retry
+                processingState.classList.add('hidden');
+                filePreview.classList.remove('hidden');
+            }
+        });
+
+        // Update results table
+        function updateResults(newData) {
+            newData.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="cell-file">${row.file_name || '-'}</td>
+                    <td>${row.invoice_date || '-'}</td>
+                    <td><span class="mono">${row.invoice_number || '-'}</span></td>
+                    <td><span class="mono">${row.bl_number || '-'}</span></td>
+                    <td>${row.port_of_loading || '-'}</td>
+                    <td>${row.cy_cfs_destination || '-'}</td>
+                    <td><span class="mono highlight">${row.container_number || '-'}</span></td>
+                    <td class="cell-number">${row.gross_weight != null ? row.gross_weight : '-'}</td>
+                    <td class="cell-amount">${row.total_amount != null ? row.total_amount : '-'}</td>
+                `;
+                resultsBody.appendChild(tr);
+            });
+            
+            emptyState.classList.add('hidden');
+            tableWrapper.classList.remove('hidden');
+        }
+
+        // Download handler
+        downloadBtn.addEventListener('click', () => {
+            if (resultsBody.children.length === 0) {
+                showToast('No data to download', 'error');
+                return;
+            }
+            window.location.href = '/download';
+        });
+
+        // Clear results
+        clearBtn.addEventListener('click', async () => {
+            if (!confirm('Are you sure you want to clear all results?')) return;
+            
+            try {
+                const response = await fetch('/clear_results', { method: 'POST' });
+                const result = await response.json();
+                
+                if (result.success) {
+                    resultsBody.innerHTML = '';
+                    resultsCount.textContent = '0';
+                    emptyState.classList.remove('hidden');
+                    tableWrapper.classList.add('hidden');
+                    showToast('All results cleared', 'success');
+                }
+            } catch (error) {
+                showToast('Failed to clear results', 'error');
+            }
+        });
+
+        // Toast notification
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            toast.querySelector('.toast-message').textContent = message;
+            toast.className = `toast toast-${type} show`;
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 4000);
+        }
+    </script>
+</body>
+</html>
