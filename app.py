@@ -186,7 +186,7 @@ def extract():
 def download():
     if os.path.exists(app.config['OUTPUT_FILE']):
         return send_file(app.config['OUTPUT_FILE'], as_attachment=True)
-    return jsonify({'error': 'No results to download'}), 404
+    return jsonify({'error': 'No results to downloads'}), 404
 
 @app.route('/clear_results', methods=['POST'])
 def clear_results():
